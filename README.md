@@ -138,4 +138,4 @@ That would require each site to establish a relationship with every agent provid
 
 This develops the [straw proposal in WebMCP issue #186](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6369314489) and the [12 November 2026 WebML CG resolution](https://www.w3.org/2026/11/12-webmachinelearning-minutes.html#cad0) requesting an Agent Interaction Measurement explainer. The discussion includes [demand for RUM without tool wrappers](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-5510686305), [user-control concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-4929491673), and [fingerprinting concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6413798793).
 
-Thanks to participants in that discussion and the [related observability work](https://github.com/w3c/tpac2026-breakouts/issues/63).
+Thanks to participants in those discussions.

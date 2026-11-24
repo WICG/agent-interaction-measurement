@@ -111,36 +111,31 @@ Given that feedback may arrive after navigation or page closure, we should explo
 
 Browser-integrated agents could use internal interfaces. Extension agents need a browser-mediated bridge; injected page script alone may be indistinguishable from other page script. In-page agents may need a web-exposed API to provide interaction data. Local agents external to the browser may need a WebDriver BiDi API that enables them to report this information.
 
-## Privacy, security, and accessibility
+## Privacy and security
 
-- **Minimize disclosure.** Do not expose prompts, conversation history, reasoning, user goals, tool arguments/results, exception text, or cross-site task IDs. Even enum-valued feedback can be sensitive when linked to a visit.
-- **Preserve boundaries.** Begin with secure-context documents observing their own activity, without automatic frame aggregation. Cross-origin tool access through `exposedTo` is not permission to inspect another origin's timeline. Page-visible data is also available to third-party scripts running with that page's privileges.
-- **Respect user choice.** Feedback given to an agent is not automatically intended for a website. Newly exposed agent data needs an appropriate user-control and consent model; configuring an endpoint is not consent.
-- **Limit fingerprinting.** Caller categories reveal agent use; model identifiers, step timings, and assessments add probing opportunities. Coarsening, sampling, rate limits, and omitting unnecessary fields need evaluation. Discovery, skipped tools, and safety-block reasons are not part of this sketch.
-- **Do not equate reporting with anonymity.** Delayed, credential-less reports can still be linked through URLs, IDs, or network metadata. Restricted or aggregate reporting needs an explicit privacy design.
-- **Keep telemetry separate from authority.** Measurements do not authenticate agents or prove authorization, correctness, or user consent. Bound buffers, step lists, and retained reports; define expiry and deletion on permission revocation or browsing-data clearing.
-- **Support human oversight.** Confirmations, corrections, and assistive-technology use are not failures. Synthesized input alone must not identify an agent. Metrics do not prove a UI change was perceivable; any consent or feedback UI must be accessible and localizable.
+The performance entries described in this explainer expose new information.
+Details about WebMCP tools callers, their origin, the agent and model and the agent's assessment of the tools are all novel information.
+Similarly, the data exposed by agent-interaction and agent-outcome is novel as well.
 
-## Alternatives
+While this data is required for site operators to ship WebMCP tools at scale and improve them over time, it's data for [ancillary use](https://www.w3.org/TR/privacy-principles/#dfn-ancillary-use).
+We should be careful about that data and make sure that it doesn't expose any unnecessary information about the user, and their goals. On top of that, we should make sure that no cross-site information is exposed.
 
-- **Author instrumentation / User Timing:** Useful today, but requires integration and lacks agent-side context or browser-established provenance.
-- **Provider dashboards or feedback tools:** Can provide richer data, but require per-provider arrangements or changes to tool interfaces, with similar feedback-privacy concerns.
-- **A separate observer or DOM events:** PerformanceObserver already supplies asynchronous, buffered measurement. Functional `toolactivated` and `toolcancel` events should remain where needed; measurement must not change execution behavior.
-- **DevTools or reporting-only diagnostics:** May be better homes for sensitive detail. DevTools alone does not provide field measurement; reporting must balance diagnostic utility against linkability.
+Information derived from the user interactions with the agent (e.g. `userFeedback`) should be subject to user consent.
+
+## Considered alternatives
+
+### Backend communication with agent providers
+The agent-bound information could also be reached through proprieary dashboards provided by the agent-providers.
+That would require each site to establish a relationship with every agent provider in order to keep track of their agentic experiences. That seems suboptimal.
 
 ## Open questions
 
-1. What is the smallest useful page-visible surface? Which signals belong only in restricted reports, aggregates, or DevTools, and what user controls are needed?
-2. How should timing and entry delivery work across same-origin navigations? What precision, buffer limits, and partial-entry rules are appropriate?
-3. How should validation, declarative execution, navigation-triggering tools, and cancellation map to completion measurements?
-4. How should agent turns relate to [Event Timing's `interactionId`](https://www.w3.org/TR/event-timing/#dom-performanceeventtiming-interactionid), UI updates, and human interventions? Would an `agentInvoked` flag justify its added exposure?
-5. Which lifecycle and assessment signals can agent providers supply reliably? What extension or in-page integration is needed?
-6. Is tool-discovery measurement necessary, and can it avoid exposing tool selection or safety decisions?
-
-The next step is to review these use cases and signals with agent providers, RUM developers, and privacy reviewers, coordinating scope with the WebML CG and Web Performance WG.
+1. How should agent turns relate to [Event Timing's `interactionId`](https://www.w3.org/TR/event-timing/#dom-performanceeventtiming-interactionid), UI updates, and human interventions? Should agentic interactions count for the purposes of [INP](https://developer.mozilla.org/en-US/docs/Glossary/Interaction_to_next_paint)?
+2. What APIs should we provide to agent implementations (in-page or external to the browser) to enable them to provide the necessary data?
+3. How can we safely represent agentic interactions that span origins and sites? How can we define the interaction start and end at the origin's boundaries?
 
 ## Background
 
 This develops the [straw proposal in WebMCP issue #186](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6369314489) and the [12 November 2026 WebML CG resolution](https://www.w3.org/2026/11/12-webmachinelearning-minutes.html#cad0) requesting an Agent Interaction Measurement explainer. The discussion includes [demand for RUM without tool wrappers](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-5510686305), [user-control concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-4929491673), and [fingerprinting concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6413798793).
 
-Thanks to participants in that discussion and the [related observability work](https://github.com/w3c/tpac2026-breakouts/issues/63). Their participation does not imply endorsement; no browser implementation commitment is claimed.
+Thanks to participants in that discussion and the [related observability work](https://github.com/w3c/tpac2026-breakouts/issues/63).

@@ -2,7 +2,7 @@
 
 **Author:** [Yoav Weiss](https://github.com/yoavweiss)
 
-**Status:** Personal draft for proposed WICG incubation. The API and exposure policy are provisional; this is not an implemented feature.
+**Status:** Personal draft for proposed incubation.
 
 **Discuss:** [Issues](https://github.com/yoavweiss/agent-interaction-measurement/issues) · [Pull requests](https://github.com/yoavweiss/agent-interaction-measurement/pulls)
 

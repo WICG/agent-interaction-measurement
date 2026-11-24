@@ -43,6 +43,8 @@ if ("PerformanceObserver" in globalThis) {
 }
 ```
 
+RUM providers could export `tool-call` and `agent-interaction` entries as [OpenTelemetry GenAI](https://github.com/open-telemetry/semantic-conventions-genai) `execute_tool` and `invoke_agent` spans, respectively.
+
 ### 1. `tool-call`
 
 One invocation of a [WebMCP](https://webmachinelearning.github.io/webmcp/) tool, observed by the document that registered it. The design should also cover tools from the [declarative API exploration](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md), whose completion hooks still need definition.
@@ -109,7 +111,7 @@ Given that feedback may arrive after navigation or page closure, we should explo
 - **Interactions:** Cooperating agents must supply turn boundaries and processing/waiting states, integrated with browser actuation attribution.
 - **Assessments and feedback:** Only the agent or its feedback UI can supply these; they must be optional and safely scoped.
 
-Browser-integrated agents could use internal interfaces. Extension agents need a browser-mediated bridge; injected page script alone may be indistinguishable from other page script. In-page agents may need a web-exposed API to provide interaction data. Local agents external to the browser may need a WebDriver BiDi API that enables them to report this information.
+Browser-integrated agents could use internal interfaces. Extension agents need a browser-mediated bridge; injected page script alone may be indistinguishable from other page script. In-page agents may need a web-exposed API to provide interaction data. Those built on the [Prompt API](https://webmachinelearning.github.io/prompt-api/) may not: the browser runs their model and dispatches their tool calls, so it can observe both directly. Local agents external to the browser may need a WebDriver BiDi API that enables them to report this information.
 
 ## Privacy and security
 
@@ -122,20 +124,28 @@ We should be careful about that data and make sure that it doesn't expose any un
 
 Information derived from the user interactions with the agent (e.g. `userFeedback`) should be subject to user consent.
 
+Agent and model identity need particular care, as they pose a risk of increasing the fingerprinting surface (e.g. for users that use uncommon agents/models).
+
 ## Considered alternatives
 
 ### Backend communication with agent providers
 The agent-bound information could also be reached through proprieary dashboards provided by the agent-providers.
 That would require each site to establish a relationship with every agent provider in order to keep track of their agentic experiences. That seems suboptimal.
 
+### Developer tools only
+Browsers could surface agent interactions in developer tools without exposing them to the web. That sidesteps most privacy concerns, allows richer detail, and [drew interest](https://github.com/w3c/tpac2026-breakouts/issues/63) for Prompt API observability at TPAC 2026.
+However, it only helps debug individual sessions, and doesn't tell sites how their tools perform for real users. It also doesn't help developers know how their sites perform with agents/models they are not explicitly testing.
+
 ## Open questions
 
-1. How should agent turns relate to [Event Timing's `interactionId`](https://www.w3.org/TR/event-timing/#dom-performanceeventtiming-interactionid), UI updates, and human interventions? Should agentic interactions count for the purposes of [INP](https://developer.mozilla.org/en-US/docs/Glossary/Interaction_to_next_paint)?
+1. How should agent turns relate to [Event Timing's `interactionId`](https://www.w3.org/TR/event-timing/#dom-performanceeventtiming-interactionid), UI updates, and human interventions? Should agentic interactions count for the purposes of [INP](https://developer.mozilla.org/en-US/docs/Glossary/Interaction_to_next_paint)? Tying tool calls to the UI updates they cause may need [AsyncContext](https://github.com/tc39/proposal-async-context)-style task attribution.
 2. What APIs should we provide to agent implementations (in-page or external to the browser) to enable them to provide the necessary data?
 3. How can we safely represent agentic interactions that span origins and sites? How can we define the interaction start and end at the origin's boundaries?
+4. Should `caller` distinguish page script invoking tools directly from a page's own Prompt API session invoking them?
+5. If built-in AI APIs like the Prompt API gain their own performance entries, as [discussed at TPAC 2026](https://github.com/w3c/tpac2026-breakouts/issues/63), should those share `interactionId`s with the agent interactions they're part of?
 
 ## Background
 
 This develops the [straw proposal in WebMCP issue #186](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6369314489) and the [12 November 2026 WebML CG resolution](https://www.w3.org/2026/11/12-webmachinelearning-minutes.html#cad0) requesting an Agent Interaction Measurement explainer. The discussion includes [demand for RUM without tool wrappers](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-5510686305), [user-control concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-4929491673), and [fingerprinting concerns](https://github.com/webmachinelearning/webmcp/issues/186#issuecomment-6413798793).
 
-Thanks to participants in that discussion and the [related observability work](https://github.com/w3c/tpac2026-breakouts/issues/63).
+Thanks to participants in that discussion and in the [TPAC 2026 breakout on on-device AI observability](https://github.com/w3c/tpac2026-breakouts/issues/63), which explored the adjacent case of sites running their own inference through the Prompt API.
